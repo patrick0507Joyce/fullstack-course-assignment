@@ -4,17 +4,13 @@ import ReactDOM from "react-dom";
 const Content = (props) => {
   const courses = props.courses;
 
-  const courseListItems = Object.keys(courses).map((key, index) => (
+  const courseListItems = courses.map((course, index) => (
     <p key={index}>
-      {key} {courses[key]} 
+      {course.name} {course.exercises}
     </p>
   ));
-  
-  return (
-  <div>
-    {courseListItems}
-  </div>
-  );
+
+  return <div>{courseListItems}</div>;
 };
 
 export default Content;

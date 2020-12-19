@@ -3,7 +3,10 @@ import ReactDOM from "react-dom";
 
 const Total = (props) => {
   const courses = props.courses;
-  const courseSum = Object.keys(courses).reduce((sum,key)=>sum+parseInt(courses[key]||0),0)
+  const courseSum = courses.reduce(
+    (sum, course) => sum + parseInt(course.exercises || 0),
+    0
+  );
 
   return (
     <div>
