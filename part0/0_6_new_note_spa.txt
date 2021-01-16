@@ -1,0 +1,6 @@
+browser->server: HTTP POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa
+server-->browser: application/json
+
+After got the confirmation {"message":"note created"} from the server, the SPA renders
+the page based on existing data with the data submitted with the users, without need to fetch 
+the whole HTML && CSS && JS && JSON from server anymore.
