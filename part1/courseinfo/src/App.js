@@ -22,6 +22,7 @@ const App = () => {
       }
     ]
   }
+  
   return (
     <div>
       <Header title={course.name} />
