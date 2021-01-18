@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import PersonForm from './components/PersonForm/PersonForm';
 import Persons from './components/Persons/Persons';
 import phoneNumberService from './services/phoneNumber';
+import Notification from './components/Notification/Notification';
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -12,6 +13,9 @@ const App = () => {
 
   const [searchContent, setSearchContent] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const personsHook = () => {
     phoneNumberService.getPhoneNumberPersons().then(phoneNumberPersons => setPersons(phoneNumberPersons))
@@ -28,14 +32,20 @@ const App = () => {
       };
 
       if (persons.filter((person) => person.name === newName).length !== 0) {
+        const oldPerson = persons.filter((person) => person.name === newName)[0];
         const result = window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`);
         if (result) {
-          const oldPerson = persons.filter((person) => person.name === newName)[0];
           phoneNumberService
             .updatePhoneNumber(oldPerson.id, {...oldPerson, number: newNumber})
             .then(modifiedPerson => {
               console.log(modifiedPerson);
               setPersons(persons.filter(person => person.id !== oldPerson.id).concat(modifiedPerson));
+              setSuccessMessage(`Updated ${modifiedPerson.name}`);
+            })
+            .catch(error => {
+              setPersons(persons.filter(person => person.id !== oldPerson.id));
+              console.log({persons});
+              setErrorMessage(`Information of ${oldPerson.name} has already been removed from server`);
             })
         }
       } else if (persons.filter((person) => person.number === newNumber).length !== 0) {
@@ -45,6 +55,7 @@ const App = () => {
           .createPhoneNumber(newPerson)
           .then(returnPerson => {
             setPersons(persons.concat(returnPerson));
+            setSuccessMessage(`Added ${returnPerson.name}`);
           });
         
       }
@@ -68,7 +79,8 @@ const App = () => {
   }
 
   useEffect(() => {
-    setSearchResults(persons.filter(person => person.name.toLowerCase().includes(searchContent.toLowerCase())));
+    console.log(persons);
+    setSearchResults(persons.filter(person => person && person.name.toLowerCase().includes(searchContent.toLowerCase())));
   }, [searchContent, persons]);
 
   const handleDeletePhoneNumber = (id, name) => {
@@ -79,6 +91,8 @@ const App = () => {
         phoneNumberService.deletePhoneNumber(id).then(status => {
           if (status === 200) {
             setPersons(persons.filter(person => person.id !== id));
+            console.log({persons});
+            setSuccessMessage(`Deleted ${name}`);
           }
         })
         
@@ -89,10 +103,11 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification successMessage={successMessage} errorMessage={errorMessage} />
       <Filter searchContent={searchContent} handleSearchChange={handleSearchChange} />
       
       <h2>add a new</h2>
-      <PersonForm newName={newName} newNumber={newNumber} addPerson={addPerson} handleNameChange={handleNameChange} handleNumberChange={handleNumberChange}  />
+      <PersonForm newName={newName} newNumber={newNumber} addPerson={addPerson} handleNameChange={handleNameChange} handleNumberChange={handleNumberChange} />
       
       <h2>Numbers</h2>
       <Persons Persons={searchResults} handleDeletePhoneNumber={handleDeletePhoneNumber} />
